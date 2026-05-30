@@ -450,7 +450,7 @@ export default function App() {
                       <option value="all">All Assets Combined (Portfolio)</option>
                       {[...assets].sort((a, b) => a.name.localeCompare(b.name)).map((asset) => (
                         <option key={asset.id} value={asset.id}>
-                          {asset.name} ({asset.symbol || 'N/A'})
+                          {asset.name}
                         </option>
                       ))}
                     </select>

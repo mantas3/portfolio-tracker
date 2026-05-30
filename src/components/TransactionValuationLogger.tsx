@@ -173,7 +173,7 @@ export const TransactionValuationLogger: React.FC<TransactionValuationLoggerProp
                 >
                   {sortedAssets.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.name} ({a.symbol})
+                      {a.name}
                     </option>
                   ))}
                 </select>
@@ -273,7 +273,7 @@ export const TransactionValuationLogger: React.FC<TransactionValuationLoggerProp
                 >
                   {sortedAssets.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.name} ({a.symbol})
+                      {a.name}
                     </option>
                   ))}
                 </select>

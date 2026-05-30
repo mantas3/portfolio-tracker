@@ -8,7 +8,7 @@ export type AssetType = 'etf' | 'fund' | 'p2p' | 'pension' | 'other';
 export interface Asset {
   id: string;
   name: string;
-  symbol: string;
+  symbol?: string;
   type: AssetType;
   currency: string;
   description?: string;

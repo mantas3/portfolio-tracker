@@ -49,13 +49,11 @@ export const AssetsList: React.FC<AssetsListProps> = ({
 
   // Add Asset Form States
   const [newName, setNewName] = useState('');
-  const [newSymbol, setNewSymbol] = useState('');
   const [newType, setNewType] = useState<AssetType>('etf');
   const [newDescription, setNewDescription] = useState('');
 
   // Edit Asset Form States
   const [editName, setEditName] = useState('');
-  const [editSymbol, setEditSymbol] = useState('');
   const [editType, setEditType] = useState<AssetType>('etf');
   const [editDescription, setEditDescription] = useState('');
 
@@ -65,7 +63,6 @@ export const AssetsList: React.FC<AssetsListProps> = ({
 
     onAddAsset({
       name: newName.trim(),
-      symbol: newSymbol.trim().toUpperCase() || 'N/A',
       type: newType,
       currency: currencySymbol,
       description: newDescription.trim() || undefined,
@@ -73,7 +70,6 @@ export const AssetsList: React.FC<AssetsListProps> = ({
 
     // Reset Form
     setNewName('');
-    setNewSymbol('');
     setNewType('etf');
     setNewDescription('');
     setIsAdding(false);
@@ -82,7 +78,6 @@ export const AssetsList: React.FC<AssetsListProps> = ({
   const startEdit = (asset: Asset) => {
     setEditingAssetId(asset.id);
     setEditName(asset.name);
-    setEditSymbol(asset.symbol);
     setEditType(asset.type);
     setEditDescription(asset.description || '');
   };
@@ -94,7 +89,6 @@ export const AssetsList: React.FC<AssetsListProps> = ({
     onEditAsset({
       ...asset,
       name: editName.trim(),
-      symbol: editSymbol.trim().toUpperCase() || 'N/A',
       type: editType,
       description: editDescription.trim() || undefined,
     });
@@ -156,7 +150,7 @@ export const AssetsList: React.FC<AssetsListProps> = ({
             <h3 className="font-bold text-slate-800 text-sm">Define New Holding Instrument</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-600">Instrument Name *</label>
               <input
@@ -167,17 +161,6 @@ export const AssetsList: React.FC<AssetsListProps> = ({
                 onChange={(e) => setNewName(e.target.value)}
                 className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:outline-none transition-colors"
                 id="add-asset-name"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600">Ticker/Symbol (Short Identifier)</label>
-              <input
-                type="text"
-                placeholder="e.g. SMH"
-                value={newSymbol}
-                onChange={(e) => setNewSymbol(e.target.value)}
-                className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2.5 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:outline-none transition-colors"
-                id="add-asset-symbol"
               />
             </div>
             <div className="space-y-1.5">
@@ -262,7 +245,7 @@ export const AssetsList: React.FC<AssetsListProps> = ({
                   onSubmit={(e) => handleEditSubmit(e, asset)}
                   className="bg-slate-50 border-2 border-indigo-100 p-5 rounded-2xl space-y-4"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Asset Name</label>
                       <input
@@ -270,15 +253,6 @@ export const AssetsList: React.FC<AssetsListProps> = ({
                         required
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 bg-white focus:border-indigo-500 focus:outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Ticker/Symbol</label>
-                      <input
-                        type="text"
-                        value={editSymbol}
-                        onChange={(e) => setEditSymbol(e.target.value)}
                         className="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 bg-white focus:border-indigo-500 focus:outline-none"
                       />
                     </div>
@@ -345,9 +319,6 @@ export const AssetsList: React.FC<AssetsListProps> = ({
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
                     <span className="font-extrabold text-slate-900 tracking-tight block truncate text-sm md:text-base">
                       {asset.name}
-                    </span>
-                    <span className="text-slate-400 font-semibold text-[10px] font-mono tracking-wider bg-slate-50 border border-slate-100 rounded-md px-1.5 py-0.5">
-                      {asset.symbol}
                     </span>
                     <span className={`text-[10px] font-bold border px-1.5 py-0.5 rounded-full ${theme.bg}`}>
                       {theme.label}
