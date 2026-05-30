@@ -1,0 +1,6 @@
+{
+  "name": "Investment Tracker",
+  "description": "An application to track manual investments of ETFs, Funds, and P2P sites over time, with detailed performance dashboards and asset allocation trends.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
