@@ -301,6 +301,45 @@ export default function App() {
     return { earnings: lastMonthEarnings, percent: lastMonthPercent };
   }, [historicalDataPoints]);
 
+  const overallLast12MonthsMetrics = useMemo(() => {
+    const last12MonthsEarnings: number[] = [];
+    let last12MonthsPercent = 0;
+    let last12MonthsInterest = 0;
+    let avgMonthlyProfit = 0;
+    let avgMonthlyPercent = 0;
+
+    if (historicalDataPoints && historicalDataPoints.length > 0) {
+      const len = historicalDataPoints.length;
+      const start = Math.max(0, len - 12);
+      for (let i = start; i < len; i++) {
+        const current = historicalDataPoints[i];
+        const prev = i > 0 ? historicalDataPoints[i - 1] : null;
+        const monthlyGain = prev ? (current.profit - prev.profit) : current.profit;
+        last12MonthsEarnings.push(monthlyGain);
+      }
+
+      last12MonthsInterest = last12MonthsEarnings.reduce((sum, val) => sum + val, 0);
+
+      const priorPoint = len > 12 ? historicalDataPoints[len - 13] : null;
+      const baseValue = priorPoint ? priorPoint.value : 0;
+      const currentPoint = historicalDataPoints[len - 1];
+      const deltaInvested = currentPoint.invested - (priorPoint ? priorPoint.invested : 0);
+      const capitalAtRisk = baseValue + Math.max(0, deltaInvested);
+
+      last12MonthsPercent = capitalAtRisk > 0 ? (last12MonthsInterest / capitalAtRisk) * 100 : 0;
+
+      avgMonthlyProfit = last12MonthsEarnings.length > 0 ? last12MonthsInterest / last12MonthsEarnings.length : 0;
+      avgMonthlyPercent = last12MonthsEarnings.length > 0 ? last12MonthsPercent / last12MonthsEarnings.length : 0;
+    }
+
+    return {
+      last12MonthsInterest,
+      last12MonthsPercent,
+      avgMonthlyProfit,
+      avgMonthlyPercent,
+    };
+  }, [historicalDataPoints]);
+
   // Dashboard filtering computations
   const dashboardAssets = useMemo(() => {
     if (selectedAssetId === 'all') return assets;
@@ -333,35 +372,57 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans flex flex-col">
       {/* Top Header Section */}
       <header className="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-indigo-600" />
+            <h1 className="text-xs font-black tracking-tight text-slate-900 uppercase">Portfolio Ledger</h1>
+          </div>
           
           {/* Quick Stats Banner */}
-          <div className="flex flex-wrap items-center gap-4 text-xs font-medium border border-slate-100 rounded-2xl py-2 px-4 bg-slate-50/50 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-semibold border border-slate-100 rounded-2xl py-2 px-4 bg-slate-50/50 w-full lg:w-auto">
             <div className="flex items-center gap-1 text-slate-500">
               <span>Total Invested:</span>
               <strong className="text-slate-800 font-bold">{formatCurrency(portfolioSummary.totalInvested, currencySymbol)}</strong>
             </div>
-            <div className="text-slate-200 hidden sm:block">|</div>
+            <div className="text-slate-200 hidden lg:block">|</div>
             <div className="flex items-center gap-1 text-slate-500">
               <span>Portfolio Value:</span>
               <strong className="text-indigo-650 font-bold">{formatCurrency(portfolioSummary.totalValue, currencySymbol)}</strong>
             </div>
-            <div className="text-slate-200 hidden sm:block">|</div>
+            <div className="text-slate-200 hidden lg:block">|</div>
             <div className="flex items-center gap-1 text-slate-500">
-              <span>Total Profit / Loss:</span>
+              <span>Total Profit/Loss:</span>
               <span className={`font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
                 portfolioSummary.totalProfit >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
               }`}>
                 {portfolioSummary.totalProfit >= 0 ? '+' : ''}{formatCurrency(portfolioSummary.totalProfit, currencySymbol)} ({formatPercent(portfolioSummary.percentageReturn)})
               </span>
             </div>
-            <div className="text-slate-200 hidden sm:block">|</div>
+            <div className="text-slate-200 hidden lg:block">|</div>
             <div className="flex items-center gap-1 text-slate-500">
-              <span>Last Month Earnings:</span>
+              <span>Last Month:</span>
               <span className={`font-bold px-1.5 py-0.5 rounded-md ${
-                overallLastMonthMetrics.earnings >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                overallLastMonthMetrics.earnings >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-750'
               }`}>
                 {overallLastMonthMetrics.earnings >= 0 ? '+' : ''}{formatCurrency(overallLastMonthMetrics.earnings, currencySymbol)} ({overallLastMonthMetrics.percent >= 0 ? '+' : ''}{overallLastMonthMetrics.percent.toFixed(1)}%)
+              </span>
+            </div>
+            <div className="text-slate-200 hidden lg:block">|</div>
+            <div className="flex items-center gap-1 text-slate-500">
+              <span>Avg. Monthly (12M):</span>
+              <span className={`font-bold px-1.5 py-0.5 rounded-md ${
+                overallLast12MonthsMetrics.avgMonthlyProfit >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+              }`}>
+                {overallLast12MonthsMetrics.avgMonthlyProfit >= 0 ? '+' : ''}{formatCurrency(overallLast12MonthsMetrics.avgMonthlyProfit, currencySymbol)} ({overallLast12MonthsMetrics.avgMonthlyPercent >= 0 ? '+' : ''}{overallLast12MonthsMetrics.avgMonthlyPercent.toFixed(1)}%)
+              </span>
+            </div>
+            <div className="text-slate-200 hidden lg:block">|</div>
+            <div className="flex items-center gap-1 text-slate-500">
+              <span>Last 12M Interest:</span>
+              <span className={`font-bold px-1.5 py-0.5 rounded-md ${
+                overallLast12MonthsMetrics.last12MonthsInterest >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+              }`}>
+                {overallLast12MonthsMetrics.last12MonthsInterest >= 0 ? '+' : ''}{formatCurrency(overallLast12MonthsMetrics.last12MonthsInterest, currencySymbol)} ({overallLast12MonthsMetrics.last12MonthsPercent >= 0 ? '+' : ''}{overallLast12MonthsMetrics.last12MonthsPercent.toFixed(1)}%)
               </span>
             </div>
           </div>
@@ -370,7 +431,7 @@ export default function App() {
       </header>
 
       {/* Main Body Layout */}
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-grow max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Navigation Tabs Bar */}
         <div className="flex border-b border-slate-200 gap-2 mb-8 overflow-x-auto pb-px custom-scroll">
           <button
