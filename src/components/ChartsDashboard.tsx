@@ -211,7 +211,7 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
 
           <div className="flex-1 min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: 15, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15}/>
@@ -240,6 +240,7 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
                   axisLine={false}
                   stroke="#94a3b8"
                   fontSize={11}
+                  width={65}
                   tickFormatter={(val) => formatCurrency(val, currencySymbol)}
                 />
                 <Tooltip
@@ -340,7 +341,7 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
 
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={monthlyReturnsData} margin={{ top: 10, right: -10, left: -20, bottom: 0 }}>
+            <ComposedChart data={monthlyReturnsData} margin={{ top: 10, right: 15, left: 15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis
                 dataKey="date"
@@ -360,6 +361,7 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
                 axisLine={false}
                 stroke="#94a3b8"
                 fontSize={11}
+                width={65}
                 tickFormatter={(val) => formatCurrency(val, currencySymbol)}
               />
               <YAxis
@@ -369,6 +371,7 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
                 axisLine={false}
                 stroke="#94a3b8"
                 fontSize={11}
+                width={45}
                 tickFormatter={(val) => `${val >= 0 ? '+' : ''}${val.toFixed(0)}%`}
               />
               <Tooltip
@@ -431,7 +434,7 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
 
           <div className="flex-1 min-h-0 mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={filteredData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <LineChart data={filteredData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis
                   dataKey="date"
@@ -445,6 +448,7 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
                   axisLine={false}
                   stroke="#94a3b8"
                   fontSize={10}
+                  width={45}
                   tickFormatter={(val) => `${val.toFixed(0)}%`}
                 />
                 <Tooltip
