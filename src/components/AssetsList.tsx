@@ -304,7 +304,7 @@ export const AssetsList: React.FC<AssetsListProps> = ({
             return (
               <div
                 key={asset.id}
-                className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all"
+                className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow relative overflow-hidden grid grid-cols-1 md:grid-cols-12 md:items-center gap-4 transition-all"
               >
                 {/* ID indicator bar for aesthetics */}
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${
@@ -314,8 +314,8 @@ export const AssetsList: React.FC<AssetsListProps> = ({
                   asset.type === 'pension' ? 'bg-purple-500' : 'bg-amber-500'
                 }`} />
 
-                {/* Left - Meta */}
-                <div className="flex-1 min-w-0 pl-1">
+                {/* Left - Meta (Name, category tag & description) - Spans 5 cols */}
+                <div className="col-span-1 md:col-span-5 min-w-0 pl-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
                     <span className="font-extrabold text-slate-900 tracking-tight block truncate text-sm md:text-base">
                       {asset.name}
@@ -331,47 +331,44 @@ export const AssetsList: React.FC<AssetsListProps> = ({
                   )}
                 </div>
 
-                {/* Middle - Numerical performance details */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 shrink-0 py-2 border-t md:border-t-0 md:py-0 border-slate-50">
-                  {/* Ledger Basis (Total Invested) */}
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Cost Basis</span>
-                    <span className="text-sm font-semibold text-slate-800">
-                      {performance ? formatCurrency(performance.totalInvested, currencySymbol) : formatCurrency(0, currencySymbol)}
-                    </span>
-                  </div>
-
-                  {/* Present Net Valuation Asset Current Value */}
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Valuation Asset Size</span>
-                    <span className="text-sm font-bold text-indigo-700">
-                      {performance ? formatCurrency(performance.totalValue, currencySymbol) : formatCurrency(0, currencySymbol)}
-                    </span>
-                  </div>
-
-                  {/* Overall return yield details */}
-                  <div className="flex flex-col col-span-2 lg:col-span-1 border-t pt-2 lg:pt-0 lg:border-t-0 border-slate-50/50">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Returns Allocation</span>
-                    {hasInvested && performance ? (
-                      <div className="flex items-center gap-1.5">
-                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full flex items-center ${
-                          isProfit ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-                        }`}>
-                          {isProfit ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingDown className="h-3 w-3 mr-0.5" />}
-                          {formatPercent(yieldVal)}
-                        </span>
-                        <span className={`text-xs font-semibold ${isProfit ? 'text-emerald-600' : 'text-red-500'}`}>
-                          ({isProfit ? '+' : ''}{formatCurrency(performance.totalProfit, currencySymbol)})
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-slate-400 italic">No active inputs</span>
-                    )}
-                  </div>
+                {/* Ledger Basis (Total Invested) - Spans 2 cols */}
+                <div className="flex flex-col col-span-1 md:col-span-2 border-t pt-2 md:pt-0 md:border-t-0 border-slate-50">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Cost Basis</span>
+                  <span className="text-sm font-semibold text-slate-800">
+                    {performance ? formatCurrency(performance.totalInvested, currencySymbol) : formatCurrency(0, currencySymbol)}
+                  </span>
                 </div>
 
-                {/* Right - Control adjustments */}
-                <div className="flex md:flex-col lg:flex-row items-center justify-end gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-slate-150 shrink-0">
+                {/* Present Net Valuation Asset Current Value - Spans 2 cols */}
+                <div className="flex flex-col col-span-1 md:col-span-2 border-t pt-2 md:pt-0 md:border-t-0 border-slate-50">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Valuation Asset Size</span>
+                  <span className="text-sm font-bold text-indigo-700">
+                    {performance ? formatCurrency(performance.totalValue, currencySymbol) : formatCurrency(0, currencySymbol)}
+                  </span>
+                </div>
+
+                {/* Overall return yield details - Spans 2 cols */}
+                <div className="flex flex-col col-span-1 md:col-span-2 border-t pt-2 md:pt-0 md:border-t-0 border-slate-50">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Returns Allocation</span>
+                  {hasInvested && performance ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full flex items-center ${
+                        isProfit ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                      }`}>
+                        {isProfit ? <TrendingUp className="h-3 w-3 mr-0.5" /> : <TrendingDown className="h-3 w-3 mr-0.5" />}
+                        {formatPercent(yieldVal)}
+                      </span>
+                      <span className={`text-xs font-semibold ${isProfit ? 'text-emerald-600' : 'text-red-500'}`}>
+                        ({isProfit ? '+' : ''}{formatCurrency(performance.totalProfit, currencySymbol)})
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic">No active inputs</span>
+                  )}
+                </div>
+
+                {/* Right - Control adjustments - Spans 1 col, right-aligned */}
+                <div className="col-span-1 md:col-span-1 flex md:justify-end items-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-slate-150">
                   <button
                     onClick={() => startEdit(asset)}
                     className="p-2 border border-slate-200 hover:border-slate-350 text-slate-500 hover:text-slate-800 rounded-xl transition-all"

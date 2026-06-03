@@ -280,25 +280,44 @@ export default function App() {
     return calculateHistoricalPerformance(assets, transactions, valuations);
   }, [assets, transactions, valuations]);
 
-  const overallLastMonthMetrics = useMemo(() => {
-    let lastMonthEarnings = 0;
-    let lastMonthPercent = 0;
+  const currentMonthMetrics = useMemo(() => {
+    let earnings = 0;
+    let percent = 0;
     if (historicalDataPoints && historicalDataPoints.length > 0) {
-      if (historicalDataPoints.length >= 2) {
-        const lastPoint = historicalDataPoints[historicalDataPoints.length - 1];
-        const prevPoint = historicalDataPoints[historicalDataPoints.length - 2];
-        lastMonthEarnings = lastPoint.profit - prevPoint.profit;
-
+      const len = historicalDataPoints.length;
+      const lastPoint = historicalDataPoints[len - 1];
+      if (len >= 2) {
+        const prevPoint = historicalDataPoints[len - 2];
+        earnings = lastPoint.profit - prevPoint.profit;
         const deltaInvested = lastPoint.invested - prevPoint.invested;
         const capitalAtRisk = prevPoint.value + Math.max(0, deltaInvested);
-        lastMonthPercent = capitalAtRisk > 0 ? (lastMonthEarnings / capitalAtRisk) * 100 : 0;
+        percent = capitalAtRisk > 0 ? (earnings / capitalAtRisk) * 100 : 0;
       } else {
-        const lastPoint = historicalDataPoints[0];
-        lastMonthEarnings = lastPoint.profit;
-        lastMonthPercent = lastPoint.invested > 0 ? (lastPoint.profit / lastPoint.invested) * 100 : 0;
+        earnings = lastPoint.profit;
+        percent = lastPoint.invested > 0 ? (lastPoint.profit / lastPoint.invested) * 100 : 0;
       }
     }
-    return { earnings: lastMonthEarnings, percent: lastMonthPercent };
+    return { earnings, percent };
+  }, [historicalDataPoints]);
+
+  const lastMonthMetrics = useMemo(() => {
+    let earnings = 0;
+    let percent = 0;
+    if (historicalDataPoints && historicalDataPoints.length >= 2) {
+      const len = historicalDataPoints.length;
+      const targetPoint = historicalDataPoints[len - 2];
+      if (len >= 3) {
+        const prevPoint = historicalDataPoints[len - 3];
+        earnings = targetPoint.profit - prevPoint.profit;
+        const deltaInvested = targetPoint.invested - prevPoint.invested;
+        const capitalAtRisk = prevPoint.value + Math.max(0, deltaInvested);
+        percent = capitalAtRisk > 0 ? (earnings / capitalAtRisk) * 100 : 0;
+      } else {
+        earnings = targetPoint.profit;
+        percent = targetPoint.invested > 0 ? (targetPoint.profit / targetPoint.invested) * 100 : 0;
+      }
+    }
+    return { earnings, percent };
   }, [historicalDataPoints]);
 
   const overallLast12MonthsMetrics = useMemo(() => {
@@ -372,22 +391,18 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans flex flex-col">
       {/* Top Header Section */}
       <header className="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-indigo-600" />
-            <h1 className="text-xs font-black tracking-tight text-slate-900 uppercase">Portfolio Ledger</h1>
-          </div>
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-start gap-4">
           
           {/* Quick Stats Banner */}
           <div className="flex flex-wrap items-center gap-4 text-xs font-semibold border border-slate-100 rounded-2xl py-2 px-4 bg-slate-50/50 w-full lg:w-auto">
             <div className="flex items-center gap-1 text-slate-500">
-              <span>Total Invested:</span>
-              <strong className="text-slate-800 font-bold">{formatCurrency(portfolioSummary.totalInvested, currencySymbol)}</strong>
+              <span>Portfolio Value:</span>
+              <strong className="text-indigo-650 font-bold">{formatCurrency(portfolioSummary.totalValue, currencySymbol)}</strong>
             </div>
             <div className="text-slate-200 hidden lg:block">|</div>
             <div className="flex items-center gap-1 text-slate-500">
-              <span>Portfolio Value:</span>
-              <strong className="text-indigo-650 font-bold">{formatCurrency(portfolioSummary.totalValue, currencySymbol)}</strong>
+              <span>Total Invested:</span>
+              <strong className="text-slate-800 font-bold">{formatCurrency(portfolioSummary.totalInvested, currencySymbol)}</strong>
             </div>
             <div className="text-slate-200 hidden lg:block">|</div>
             <div className="flex items-center gap-1 text-slate-500">
@@ -400,11 +415,11 @@ export default function App() {
             </div>
             <div className="text-slate-200 hidden lg:block">|</div>
             <div className="flex items-center gap-1 text-slate-500">
-              <span>Last Month:</span>
+              <span>Current Month:</span>
               <span className={`font-bold px-1.5 py-0.5 rounded-md ${
-                overallLastMonthMetrics.earnings >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-750'
+                currentMonthMetrics.earnings >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-750'
               }`}>
-                {overallLastMonthMetrics.earnings >= 0 ? '+' : ''}{formatCurrency(overallLastMonthMetrics.earnings, currencySymbol)} ({overallLastMonthMetrics.percent >= 0 ? '+' : ''}{overallLastMonthMetrics.percent.toFixed(1)}%)
+                {currentMonthMetrics.earnings >= 0 ? '+' : ''}{formatCurrency(currentMonthMetrics.earnings, currencySymbol)} ({currentMonthMetrics.percent >= 0 ? '+' : ''}{currentMonthMetrics.percent.toFixed(1)}%)
               </span>
             </div>
             <div className="text-slate-200 hidden lg:block">|</div>

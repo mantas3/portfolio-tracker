@@ -46,7 +46,7 @@ export const TransactionValuationLogger: React.FC<TransactionValuationLoggerProp
     return [...assets].sort((a, b) => a.name.localeCompare(b.name));
   }, [assets]);
 
-  const [activeLogType, setActiveLogType] = useState<'transactions' | 'valuations'>('transactions');
+  const [activeLogType, setActiveLogType] = useState<'transactions' | 'valuations'>('valuations');
 
   // Transaction form state
   const [txnAssetId, setTxnAssetId] = useState(sortedAssets[0]?.id || '');

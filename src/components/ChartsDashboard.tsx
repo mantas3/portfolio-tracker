@@ -21,6 +21,7 @@ import {
   LineChart,
   Line,
   ComposedChart,
+  LabelList,
 } from 'recharts';
 import { motion } from 'motion/react';
 import { Eye, EyeOff, LayoutGrid, CalendarRange, PieChartIcon, TrendingUp } from 'lucide-react';
@@ -44,7 +45,7 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
     return [...assets].sort((a, b) => a.name.localeCompare(b.name));
   }, [assets]);
 
-  const [timeRange, setTimeRange] = useState<'3M' | '6M' | '1Y' | 'ALL'>('ALL');
+  const [timeRange, setTimeRange] = useState<'3M' | '6M' | '1Y' | 'ALL'>('1Y');
   const [showAssetStack, setShowAssetStack] = useState<boolean>(false);
 
   // Filter historical data based on selected time range
@@ -295,7 +296,20 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
                     return null;
                   }}
                 />
-                <Area type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={2.5} fillOpacity={1} fill="url(#colorValue)" />
+                <Area type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={2.5} fillOpacity={1} fill="url(#colorValue)">
+                  <LabelList
+                    dataKey="value"
+                    position="top"
+                    offset={10}
+                    style={{ fill: '#4f46e5', fontSize: '10px', fontWeight: 'bold' }}
+                    formatter={(val: any) => {
+                      const num = Number(val);
+                      if (isNaN(num)) return '';
+                      if (num >= 1000) return `${currencySymbol}${(num / 1000).toFixed(1)}k`;
+                      return `${currencySymbol}${num.toFixed(0)}`;
+                    }}
+                  />
+                </Area>
                 <Area type="monotone" dataKey="invested" stroke="#94a3b8" strokeDasharray="4 4" strokeWidth={1.5} fillOpacity={1} fill="url(#colorBasis)" />
 
                 {/* Optional lines showing underlying assets */}

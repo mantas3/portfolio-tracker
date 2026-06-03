@@ -24,36 +24,33 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
 }) => {
   const isProfit = summary.totalProfit >= 0;
 
-  let lastMonthEarnings = 0;
-  let lastMonthPercent = 0;
-  let displayMonthText = '';
+  let currentMonthEarnings = 0;
+  let currentMonthPercent = 0;
+  let displayCurrentMonthText = '';
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   if (historicalData && historicalData.length > 0) {
-    if (historicalData.length >= 2) {
-      const lastPoint = historicalData[historicalData.length - 1];
-      const prevPoint = historicalData[historicalData.length - 2];
-      lastMonthEarnings = lastPoint.profit - prevPoint.profit;
+    const len = historicalData.length;
+    
+    // Nearest point is Current Month
+    const currentPoint = historicalData[len - 1];
+    const [cyear, cmonth] = currentPoint.date.split('-');
+    displayCurrentMonthText = `${months[parseInt(cmonth, 10) - 1]} ${cyear}`;
 
-      const deltaInvested = lastPoint.invested - prevPoint.invested;
-      const capitalAtRisk = prevPoint.value + Math.max(0, deltaInvested);
-      lastMonthPercent = capitalAtRisk > 0 ? (lastMonthEarnings / capitalAtRisk) * 100 : 0;
-
-      // Extract month name
-      const [year, month] = lastPoint.date.split('-');
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      displayMonthText = `${months[parseInt(month, 10) - 1]} ${year}`;
+    if (len >= 2) {
+      const prevPoint = historicalData[len - 2];
+      currentMonthEarnings = currentPoint.profit - prevPoint.profit;
+      const cDeltaInvested = currentPoint.invested - prevPoint.invested;
+      const cCapitalAtRisk = prevPoint.value + Math.max(0, cDeltaInvested);
+      currentMonthPercent = cCapitalAtRisk > 0 ? (currentMonthEarnings / cCapitalAtRisk) * 100 : 0;
     } else {
-      const lastPoint = historicalData[0];
-      lastMonthEarnings = lastPoint.profit;
-      lastMonthPercent = lastPoint.invested > 0 ? (lastPoint.profit / lastPoint.invested) * 100 : 0;
-
-      const [year, month] = lastPoint.date.split('-');
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      displayMonthText = `${months[parseInt(month, 10) - 1]} ${year}`;
+      currentMonthEarnings = currentPoint.profit;
+      currentMonthPercent = currentPoint.invested > 0 ? (currentPoint.profit / currentPoint.invested) * 100 : 0;
     }
   }
 
-  const isEarningsPositive = lastMonthEarnings >= 0;
+  const isCurrentEarningsPositive = currentMonthEarnings >= 0;
 
   // Last 12 Months Metrics Calculations
   const last12MonthsEarnings: number[] = [];
@@ -90,40 +87,12 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
   const isAvgProfitPositive = avgMonthlyProfit >= 0;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 mb-8">
-      {/* Total Contributions / Invested */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      {/* Portfolio Value Card */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-slate-500 font-medium text-sm">Total Invested</span>
-          <div className="bg-cyan-50 p-2 rounded-xl text-cyan-600">
-            <PlusCircle className="h-5 w-5" />
-          </div>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-2xl font-bold text-slate-900 tracking-tight">
-            {formatCurrency(summary.totalInvested, currencySymbol)}
-          </span>
-          <div className="flex items-center gap-1.5 mt-2.5 text-xs">
-            <span className="text-slate-600 font-medium">
-              {performances.length} Active {performances.length === 1 ? 'Asset' : 'Assets'}
-            </span>
-            <span className="text-slate-400">•</span>
-            <span className="text-slate-500">Cumulative funding basis</span>
-          </div>
-        </div>
-        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-50/20 rounded-full" />
-      </motion.div>
-
-      {/* Target Asset Allocation Card / Value */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.05 }}
         className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
       >
         <div className="flex items-center justify-between mb-4">
@@ -136,19 +105,31 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
           <span className="text-2xl font-bold text-slate-900 tracking-tight">
             {formatCurrency(summary.totalValue, currencySymbol)}
           </span>
-          <div className="flex items-center gap-1.5 mt-2 text-xs">
-            <span
-              className={`flex items-center font-semibold px-2 py-0.5 rounded-full ${
-                isProfit ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-              }`}
-            >
-              {isProfit ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-              {formatPercent(summary.percentageReturn)}
-            </span>
-            <span className="text-slate-500">all-time yield</span>
-          </div>
+          <div className="h-4" /> {/* Spacing placeholder to keep heights aligned */}
         </div>
         <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-indigo-50/20 rounded-full" />
+      </motion.div>
+
+      {/* Total Contributions / Invested */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.05 }}
+        className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-slate-500 font-medium text-sm">Total Invested</span>
+          <div className="bg-cyan-50 p-2 rounded-xl text-cyan-600">
+            <PlusCircle className="h-5 w-5" />
+          </div>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-2xl font-bold text-slate-900 tracking-tight">
+            {formatCurrency(summary.totalInvested, currencySymbol)}
+          </span>
+          <div className="h-4" /> {/* Spacing placeholder to keep heights aligned */}
+        </div>
+        <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-cyan-50/20 rounded-full" />
       </motion.div>
 
       {/* Net Gains / Losses */}
@@ -177,53 +158,61 @@ export const MetricCards: React.FC<MetricCardsProps> = ({
             {isProfit ? '+' : ''}
             {formatCurrency(summary.totalProfit, currencySymbol)}
           </span>
-          <div className="flex items-center gap-1.5 mt-2.5 text-xs text-slate-500">
-            <span>Market gains + dividends</span>
+          <div className="flex items-center gap-1.5 mt-2 text-xs">
+            <span
+              className={`flex items-center font-semibold px-2 py-0.5 rounded-full ${
+                isProfit ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+              }`}
+            >
+              {isProfit ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+              {formatPercent(summary.percentageReturn)}
+            </span>
+            <span className="text-slate-500">all-time yield</span>
           </div>
         </div>
         <div className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full ${isProfit ? 'bg-emerald-50/20' : 'bg-red-50/20'}`} />
       </motion.div>
 
-      {/* Last Month Earnings */}
+      {/* Current Month Earnings */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.15 }}
+        transition={{ duration: 0.3, delay: 0.12 }}
         className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
       >
         <div className="flex items-center justify-between mb-4">
-          <span className="text-slate-500 font-medium text-sm">Last Month Earnings</span>
+          <span className="text-slate-500 font-medium text-sm">Current Month Earnings</span>
           <div
             className={`p-2 rounded-xl ${
-              isEarningsPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+              isCurrentEarningsPositive ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
             }`}
           >
-            {isEarningsPositive ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+            {isCurrentEarningsPositive ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
           </div>
         </div>
         <div className="flex flex-col">
           <span
             className={`text-2xl font-bold tracking-tight ${
-              isEarningsPositive ? 'text-emerald-600' : 'text-rose-600'
+              isCurrentEarningsPositive ? 'text-emerald-600' : 'text-rose-600'
             }`}
           >
-            {isEarningsPositive ? '+' : ''}
-            {formatCurrency(lastMonthEarnings, currencySymbol)}
+            {isCurrentEarningsPositive ? '+' : ''}
+            {formatCurrency(currentMonthEarnings, currencySymbol)}
           </span>
           <div className="flex items-center gap-1.5 mt-2.5 text-xs">
             <span
               className={`font-semibold px-2 py-0.5 rounded-full ${
-                isEarningsPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                isCurrentEarningsPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
               }`}
             >
-              {isEarningsPositive ? '+' : ''}{lastMonthPercent.toFixed(1)}%
+              {isCurrentEarningsPositive ? '+' : ''}{currentMonthPercent.toFixed(1)}%
             </span>
             <span className="text-slate-500 whitespace-nowrap">
-              {displayMonthText ? `yield in ${displayMonthText}` : 'prior period delta'}
+              {displayCurrentMonthText ? `yield in ${displayCurrentMonthText}` : 'current yield'}
             </span>
           </div>
         </div>
-        <div className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full ${isEarningsPositive ? 'bg-emerald-50/20' : 'bg-rose-50/20'}`} />
+        <div className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full ${isCurrentEarningsPositive ? 'bg-emerald-50/20' : 'bg-rose-50/20'}`} />
       </motion.div>
 
       {/* Average Monthly Profit Over Last 12 Months */}
