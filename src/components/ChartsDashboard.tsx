@@ -152,6 +152,56 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
   // Generate nice colors for individual assets in the stacked line
   const assetColors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'];
 
+  // Custom label renderer to avoid overlap between bar net return value and line yield rate
+  const renderBarLabel = (props: any) => {
+    const { x, y, width, height, value } = props;
+    const num = Number(value);
+    if (isNaN(num) || num === 0) return null;
+
+    const isNeg = num < 0;
+    const absNum = Math.abs(num);
+    let str = '';
+    if (absNum >= 1000) {
+      str = `${currencySymbol}${(absNum / 1000).toFixed(1)}k`;
+    } else {
+      str = `${currencySymbol}${absNum.toFixed(0)}`;
+    }
+    const labelText = `${isNeg ? '-' : '+'}${str}`;
+
+    const textHeight = 10;
+    const padding = 6;
+    let labelY = 0;
+    let labelColor = '#ffffff';
+
+    // We want the value at the bottom of the bar
+    if (height > 20) {
+      // Bar is tall enough to fit the label inside at the bottom
+      labelY = y + height - padding;
+      labelColor = '#ffffff'; // high-contrast white inside the color-filled bar
+    } else {
+      // Bar is too short, display it outside next to the endpoint
+      if (isNeg) {
+        labelY = y + height + textHeight + 2; // below the visual bottom of negative bar
+      } else {
+        labelY = y - 4; // above the visual top of positive bar
+      }
+      labelColor = '#475569'; // dark Slate for visibility outside
+    }
+
+    return (
+      <text
+        x={x + width / 2}
+        y={labelY}
+        fill={labelColor}
+        fontSize="9px"
+        fontWeight="bold"
+        textAnchor="middle"
+      >
+        {labelText}
+      </text>
+    );
+  };
+
   return (
     <div className="space-y-6 mb-8">
       {/* Chart controls & range switcher */}
@@ -423,6 +473,10 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
                     fill={entry.numericReturn >= 0 ? '#10b981' : '#ef4444'}
                   />
                 ))}
+                <LabelList
+                  dataKey="numericReturn"
+                  content={renderBarLabel}
+                />
               </Bar>
               <Line
                 yAxisId="right"
@@ -432,7 +486,19 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
                 strokeWidth={2.5}
                 dot={{ r: 3, fill: '#4f46e5', strokeWidth: 1 }}
                 activeDot={{ r: 5 }}
-              />
+              >
+                <LabelList
+                  dataKey="percentReturn"
+                  position="top"
+                  offset={10}
+                  style={{ fill: '#4f46e5', fontSize: '9px', fontWeight: 'bold' }}
+                  formatter={(val: any) => {
+                    const num = Number(val);
+                    if (isNaN(num)) return '';
+                    return `${num >= 0 ? '+' : ''}${num.toFixed(1)}%`;
+                  }}
+                />
+              </Line>
             </ComposedChart>
           </ResponsiveContainer>
         </div>
@@ -492,7 +558,19 @@ export const ChartsDashboard: React.FC<ChartsDashboardProps> = ({
                   strokeWidth={2.5}
                   dot={{ r: 2, fill: '#10b981', strokeWidth: 1 }}
                   activeDot={{ r: 4 }}
-                />
+                >
+                  <LabelList
+                    dataKey="returnPercentage"
+                    position="top"
+                    offset={10}
+                    style={{ fill: '#059669', fontSize: '9px', fontWeight: 'bold' }}
+                    formatter={(val: any) => {
+                      const num = Number(val);
+                      if (isNaN(num)) return '';
+                      return `${num >= 0 ? '+' : ''}${num.toFixed(1)}%`;
+                    }}
+                  />
+                </Line>
               </LineChart>
             </ResponsiveContainer>
           </div>
